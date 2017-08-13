@@ -1,0 +1,39 @@
+FROM node:alpine
+
+ENV RANETO_VERSION=0.13.0
+
+ENV	RANETO_URL=https://github.com/gilbitron/Raneto/archive/${RANETO_VERSION}.tar.gz
+
+RUN apk add --no-cache git curl && \
+	addgroup -S raneto && \
+	adduser -D -S -h /home/raneto -s /sbin/nologin -G raneto raneto
+
+EXPOSE 3000
+
+ENV NPMRC=/home/raneto/.npmrc \
+	BOWERRC=/home/raneto/.bowerrc
+
+RUN	cd /home/raneto && \
+	echo "alias npm='npm --no-bin-links'" >> ~/.bashrc && \
+	echo ${RANETO_URL} && \
+	curl -sL ${RANETO_URL} | tar xz && \
+	chown -R raneto:raneto /home/raneto/Raneto-${RANETO_VERSION} && \
+	ln -s /home/raneto/Raneto-${RANETO_VERSION} /home/raneto/Raneto
+
+
+RUN rm /home/raneto/Raneto/example/config.default.js && \
+	rm -rf /home/raneto/Raneto/example/content/*
+
+USER raneto
+COPY config.default.js /home/raneto/Raneto/example/config.default.js
+
+ENV PATH=$PATH:/home/raneto/Raneto/bin
+
+WORKDIR /home/raneto/Raneto
+
+RUN npm install --production && \
+	./node_modules/gulp/bin/gulp.js
+
+VOLUME ["~/Raneto/example/content"]
+
+ENTRYPOINT ["npm", "start"]

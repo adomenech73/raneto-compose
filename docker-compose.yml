@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  raneto:
+    build: build/raneto
+    container_name: raneto
+
+
+  nginx:
+    build: build/nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - raneto
+

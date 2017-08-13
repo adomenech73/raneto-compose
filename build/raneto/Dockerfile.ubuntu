@@ -1,0 +1,44 @@
+FROM ubuntu:trusty
+
+# Setting for packages installation
+ENV DEBIAN_FRONTEND=noninteractive \
+	RANETO_VERSION=0.13.0
+
+ENV	RANETO_URL=https://github.com/gilbitron/Raneto/archive/${RANETO_VERSION}.tar.gz
+
+# Install requirements
+RUN apt-get update && \
+	apt-get install -y git curl && \
+	curl --silent --location https://deb.nodesource.com/setup_4.x | bash - && \
+	apt-get update && \
+	apt-get install -y nodejs && \
+	groupadd -r raneto && \
+	useradd --no-log-init -r -m -g raneto raneto
+
+EXPOSE 3000
+
+USER raneto
+
+ENV NPMRC=/home/raneto/.npmrc \
+	BOWERRC=/home/raneto/.bowerrc
+
+RUN	cd ~ && \
+	echo "alias npm='npm --no-bin-links'" >> ~/.bashrc && \
+	echo ${RANETO_URL} && \
+	curl -sL ${RANETO_URL} | tar xz && \
+	ln -s /home/raneto/Raneto-${RANETO_VERSION} /home/raneto/Raneto
+
+RUN rm /home/raneto/Raneto/example/config.default.js && \
+	rm -rf /home/raneto/Raneto/example/content/*
+
+COPY config.default.js /home/raneto/Raneto/example/config.default.js
+
+ENV PATH=$PATH:/home/raneto/Raneto/bin
+WORKDIR /home/raneto/Raneto
+
+RUN npm install --production && \
+	./node_modules/gulp/bin/gulp.js
+
+VOLUME ["/home/raneto/Raneto/example/content"]
+
+ENTRYPOINT ["npm", "start"]
