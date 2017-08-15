@@ -3,14 +3,17 @@ version: '3'
 services:
   raneto:
     build: build/raneto
-    container_name: raneto
-
+#    container_name: raneto
+    volumes:
+      - raneto-volume:/home/raneto/Raneto/example/content
 
   nginx:
     build: build/nginx
-    container_name: nginx
+#    container_name: nginx
     ports:
       - "80:80"
     depends_on:
       - raneto
 
+volumes:
+  raneto-volume:

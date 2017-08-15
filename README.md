@@ -19,3 +19,7 @@ I would like to add a way to share volume between host and raneto docker image w
 As workarround its possible to load Markdown documentation to Raneto server with:
 
 ```docker-compose exec raneto git clone git_markdown_documentation_url example/content```
+
+Content can be updated anytime with:
+
+```docker-compose exec raneto  /bin/ash  example/content && git pull```
