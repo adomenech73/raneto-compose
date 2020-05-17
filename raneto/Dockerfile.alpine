@@ -1,6 +1,6 @@
-FROM node:10.0-alpine
+FROM node:12-alpine
 
-ENV RANETO_VERSION=0.13.0
+ENV RANETO_VERSION=0.16.4
 
 ENV	RANETO_URL=https://github.com/gilbitron/Raneto/archive/${RANETO_VERSION}.tar.gz
 
@@ -18,10 +18,8 @@ RUN	cd /home/raneto && \
 	echo ${RANETO_URL} && \
 	curl -sL ${RANETO_URL} | tar xz && \
 	chown -R raneto:raneto /home/raneto/Raneto-${RANETO_VERSION} && \
-	ln -s /home/raneto/Raneto-${RANETO_VERSION} /home/raneto/Raneto
-
-
-RUN rm /home/raneto/Raneto/example/config.default.js && \
+	ln -s /home/raneto/Raneto-${RANETO_VERSION} /home/raneto/Raneto && \
+	rm /home/raneto/Raneto/example/config.default.js && \
 	rm -rf /home/raneto/Raneto/example/content/*
 
 USER raneto
@@ -31,7 +29,8 @@ ENV PATH=$PATH:/home/raneto/Raneto/bin
 
 WORKDIR /home/raneto/Raneto
 
-RUN npm install --production && \
+RUN npm install gulp && \
+	npm install --production && \
 	./node_modules/gulp/bin/gulp.js
 
 VOLUME ["~/Raneto/example/content"]
